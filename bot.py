@@ -21,10 +21,12 @@ async def ping(ctx):
     await ctx.send('Pong!')
 
 @bot.command(name='stop')
-@commands.is_owner()
 async def stop(ctx):
-    await ctx.send("Stopping the bot...")
-    await bot.close()  # Close the bot
+    if ctx.author.id == bot.owner_id:
+        await ctx.send("Stopping the bot...")
+        await bot.close()
+    else:
+        await ctx.send('You do not have permission to stop the bot! :)')
 
 # Run the bot
 bot.run(PRIVATE_TOKEN)
