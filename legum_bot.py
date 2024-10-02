@@ -1,3 +1,4 @@
+import time
 import random
 import discord
 
@@ -8,10 +9,9 @@ from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN
 
 class GeneralCommands(commands.Cog):
 
-
-
     def __init__(self, bot):
         self.bot = bot
+        self.last_interaction = {}
 
     @commands.command()
     async def hello(self, ctx):
@@ -29,6 +29,28 @@ class GeneralCommands(commands.Cog):
             await self.bot.close()
         else:
             await ctx.send("Someone thinks they can stop me...")
+
+    @commands.Cog.listener()
+    async def on_command(self, ctx):
+        current_time = time.time()
+        author_id = ctx.author.id
+
+        if (author_id not in self.last_interaction) or (current_time - self.last_interaction[author_id] > 600):
+            greeting = f"It's been a while {ctx.author.mention}, {random.choice(GREETINGS)}!"
+            await ctx.send(greeting)
+
+        self.last_interaction[author_id] = current_time
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        if self.bot.user in message.mentions:
+            greeting = f"Talking about me? {random.choice(GREETINGS)} {message.author.mention}!"
+            await message.channel.send(greeting)
+
+        await self.bot.process_commands(message)
 
 
 class LegumBot(commands.Bot):
