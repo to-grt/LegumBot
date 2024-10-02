@@ -23,12 +23,32 @@ class GeneralCommands(commands.Cog):
         await ctx.send("Pong!")
 
     @commands.command()
+    async def pong(self, ctx):
+        await ctx.send("Pang!")
+
+    @commands.command()
+    async def pang(self, ctx):
+        await ctx.send("Pung?")
+
+    @commands.command()
+    async def pung(self, ctx):
+        await ctx.send("Peng!")
+
+    @commands.command()
+    async def peng(self, ctx):
+        await ctx.send("Pyng!")
+
+    @commands.command()
+    async def pyng(self, ctx):
+        await ctx.send("Ping :)")
+
+    @commands.command()
     async def restart(self, ctx):
         if ctx.author.id in ALLOWED_USERS:
-            await ctx.send("Rebooting the bot :)")
+            await ctx.send("Redémarrage du bot :)")
             await self.bot.close()
         else:
-            await ctx.send("Someone thinks they can stop me...")
+            await ctx.send("Tu pensais vraiment pouvoir m'arrêter ?")
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
@@ -36,7 +56,7 @@ class GeneralCommands(commands.Cog):
         author_id = ctx.author.id
 
         if ((author_id not in self.last_interaction) or (current_time - self.last_interaction[author_id] > 600)) and ctx.message.content != "!hello":
-            greeting = f"It's been a while {ctx.author.mention}, {random.choice(GREETINGS)}!"
+            greeting = f"Ça faisait longtemps {ctx.author.mention}, {random.choice(GREETINGS)}!"
             await ctx.send(greeting)
 
         self.last_interaction[author_id] = current_time
@@ -51,7 +71,7 @@ class GeneralCommands(commands.Cog):
             await message.channel.send(random.choice(MESSAGES_ANTOINE))
 
         elif any(trigger in message.content for trigger in TRIGGERS_BOT_NAME) or self.bot.user in message.mentions:
-            greeting = f"Talking about me {message.author.mention}? {random.choice(GREETINGS)} {message.author} :)"
+            greeting = f"Tu parles de moi {message.author.mention}? {random.choice(GREETINGS)} {message.author} :)"
             await message.channel.send(greeting)
 
 
