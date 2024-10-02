@@ -1,30 +1,37 @@
+import random
 import discord
 
 from discord.ext import commands
+from vocabulary import GREETINGS
 from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN
 
 
 class GeneralCommands(commands.Cog):
+
+
+
     def __init__(self, bot):
         self.bot = bot
-        self.language = 'french'
+
+    @commands.command()
+    async def hello(self, ctx):
+        author = ctx.author
+        await ctx.send(f"{random.choice(GREETINGS)} {author.mention}!")
 
     @commands.command()
     async def ping(self, ctx):
         await ctx.send("Pong!")
 
     @commands.command()
-    async def stop(self, ctx):
+    async def restart(self, ctx):
         if ctx.author.id in ALLOWED_USERS:
-            await ctx.send("Stopping the bot...")
+            await ctx.send("Rebooting the bot :)")
             await self.bot.close()
         else:
             await ctx.send("Someone thinks they can stop me...")
 
 
 class LegumBot(commands.Bot):
-
-    AVAILABLE_LANGUAGE = ['french', 'english']
 
     def __init__(self, **options):
         intents = discord.Intents.default()
