@@ -3,8 +3,8 @@ import random
 import discord
 
 from discord.ext import commands
-from vocabulary import GREETINGS
-from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN
+from vocabulary import GREETINGS, TRIGGERS_BOT_NAME, MESSAGES_ANTOINE
+from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN, ANTOINE_ID
 
 
 class GeneralCommands(commands.Cog):
@@ -35,7 +35,7 @@ class GeneralCommands(commands.Cog):
         current_time = time.time()
         author_id = ctx.author.id
 
-        if (author_id not in self.last_interaction) or (current_time - self.last_interaction[author_id] > 600):
+        if ((author_id not in self.last_interaction) or (current_time - self.last_interaction[author_id] > 600)) and ctx.message.content != "!hello":
             greeting = f"It's been a while {ctx.author.mention}, {random.choice(GREETINGS)}!"
             await ctx.send(greeting)
 
@@ -43,14 +43,16 @@ class GeneralCommands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+
         if message.author.bot:
             return
 
-        if self.bot.user in message.mentions:
-            greeting = f"Talking about me? {random.choice(GREETINGS)} {message.author.mention}!"
-            await message.channel.send(greeting)
+        elif message.author.id == ANTOINE_ID and random.random() < 0.20:
+            await message.channel.send(random.choice(MESSAGES_ANTOINE))
 
-        await self.bot.process_commands(message)
+        elif any(trigger in message.content for trigger in TRIGGERS_BOT_NAME) or self.bot.user in message.mentions:
+            greeting = f"Talking about me {message.author.mention}? {random.choice(GREETINGS)} {message.author} :)"
+            await message.channel.send(greeting)
 
 
 class LegumBot(commands.Bot):
