@@ -45,7 +45,7 @@ class GeneralCommands(commands.Cog):
             if general_channel:
                 random_message = random.choice(MESSAGES_MUTED) + f" {member.mention}"
                 await general_channel.send(random_message)
-        elif after.channel is None and time.localtime().tm_hour >= 0 and random.random() < 0.2:
+        elif after.channel is None and 0 <= time.localtime().tm_hour <= 8 and random.random() < 0.2:
             guild = member.guild
             general_channel = discord.utils.get(guild.text_channels, name="general")
             if general_channel:
