@@ -2,7 +2,7 @@ GREETINGS = ["Hello", "Hi", "Hey", "Greetings", "Salutations", "Howdy", "Hola", 
                   "Namaste", "Konnichiwa", "Guten Tag", "Olá", "Shalom", "Salaam", "Zdravstvuyte", "Aloha",
                   "Kia ora", "Hallo", "Hei", "Ahoj", "Hoi", "Sveiki", "Szia", "Merhaba", "Salut", "Hej"]
 
-TRIGGERS_BOT_NAME = ["Legum", "legum", "bot", "Bot", "LEGUM", "BOT", "LEGUMBOT", "LegumBot", "legumbot"]
+TRIGGERS_BOT_NAME = ["Legum", "legum", "bot", "Bot", "LEGUM", "BOT", "LEGUMBOT", "LegumBot", "legumbot", "automate", "robot"]
 
 MESSAGES_ANTOINE = [
     "Antoine, tu illumines ma journée rien qu'avec ton sourire.",

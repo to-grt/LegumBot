@@ -1,3 +1,4 @@
+import os
 import time
 import random
 import discord
@@ -64,12 +65,12 @@ class GeneralCommands(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        elif message.attachments and random.random() < 0.20:
+        elif message.attachments and random.random() < 0.8:
             for attachment in message.attachments:
                 if any(attachment.filename.lower().endswith(ext) for ext in ['jpg', 'jpeg', 'png', 'gif']):
-                    image_path = get_random_image(IMAGE_DIRECTORY)
-                    if image_path:
-                        await message.channel.send(file=discord.File(image_path))
+                    path = "assets/database_pictures"
+                    random_image_path = os.path.join(path, random.choice(os.listdir(path)))
+                    await message.channel.send(file=discord.File(random_image_path))
         elif message.author.id == ANTOINE_ID and random.random() < 0.20:
             await message.channel.send(random.choice(MESSAGES_ANTOINE))
         elif any(trigger in message.content for trigger in TRIGGERS_BOT_NAME) or self.bot.user in message.mentions:
