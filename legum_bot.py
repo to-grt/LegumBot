@@ -5,7 +5,7 @@ import discord
 
 from discord.ext import commands
 from vocabulary import GREETINGS, TRIGGERS_BOT_NAME, MESSAGES_ANTOINE, MESSAGES_MUTED, MESSAGES_TYPING, MESSAGES_GOODBYE
-from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN, ANTOINE_ID
+from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN, ANTOINE_ID, YOANN_ID
 
 
 class GeneralCommands(commands.Cog):
@@ -33,19 +33,20 @@ class GeneralCommands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_typing(self, channel, user, when):
-        if random.random() < 0.2:
+        if random.random() < 0.05:
             random_message = random.choice(MESSAGES_TYPING) + f" {user.mention}"
             await channel.send(random_message)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if before.self_mute == False and after.self_mute == True and random.random() < 0.5:
-            guild = member.guild
-            general_channel = discord.utils.get(guild.text_channels, name="general")
-            if general_channel:
-                random_message = random.choice(MESSAGES_MUTED) + f" {member.mention}"
-                await general_channel.send(random_message)
-        elif after.channel is None and 0 <= time.localtime().tm_hour <= 8 and random.random() < 0.2:
+        if before.self_mute == False and after.self_mute == True and random.random() < 0.05:
+            if message.author.id != YOANN_ID:
+                guild = member.guild
+                general_channel = discord.utils.get(guild.text_channels, name="general")
+                if general_channel:
+                    random_message = random.choice(MESSAGES_MUTED) + f" {member.mention}"
+                    await general_channel.send(random_message)
+        elif after.channel is None and 0 <= time.localtime().tm_hour <= 8 and random.random() < 0.05:
             guild = member.guild
             general_channel = discord.utils.get(guild.text_channels, name="general")
             if general_channel:
@@ -65,7 +66,7 @@ class GeneralCommands(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        elif message.attachments and random.random() < 0.8:
+        elif message.attachments and random.random() < 0.05:
             for attachment in message.attachments:
                 if any(attachment.filename.lower().endswith(ext) for ext in ['jpg', 'jpeg', 'png', 'gif']):
                     path = "assets/database_pictures"
