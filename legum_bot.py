@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 import random
@@ -5,7 +6,18 @@ import discord
 
 from discord.ext import commands
 from vocabulary import GREETINGS, TRIGGERS_BOT_NAME, MESSAGES_ANTOINE, MESSAGES_MUTED, MESSAGES_TYPING, MESSAGES_GOODBYE
-from TOKEN import ALLOWED_USERS, PRIVATE_TOKEN, ANTOINE_ID, YOANN_ID
+from deals_cog import DealsCog
+
+import TOKEN
+
+PRIVATE_TOKEN = TOKEN.PRIVATE_TOKEN
+# Optionnels : le bot démarre même si TOKEN.py ne définit que le token
+ALLOWED_USERS = getattr(TOKEN, "ALLOWED_USERS", [])
+ANTOINE_ID = getattr(TOKEN, "ANTOINE_ID", None)
+YOANN_ID = getattr(TOKEN, "YOANN_ID", None)
+DEALS_DB_PATH = getattr(TOKEN, "DEALS_DB_PATH", None)
+DEAL_DM_USER_ID = getattr(TOKEN, "DEAL_DM_USER_ID", None)
+DEAL_CHANNEL_ID = getattr(TOKEN, "DEAL_CHANNEL_ID", None)
 
 
 class GeneralCommands(commands.Cog):
@@ -40,7 +52,7 @@ class GeneralCommands(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if before.self_mute == False and after.self_mute == True and random.random() < 0.05:
-            if message.author.id != YOANN_ID:
+            if member.id != YOANN_ID:
                 guild = member.guild
                 general_channel = discord.utils.get(guild.text_channels, name="general")
                 if general_channel:
@@ -70,8 +82,9 @@ class GeneralCommands(commands.Cog):
             for attachment in message.attachments:
                 if any(attachment.filename.lower().endswith(ext) for ext in ['jpg', 'jpeg', 'png', 'gif']):
                     path = "assets/database_pictures"
-                    random_image_path = os.path.join(path, random.choice(os.listdir(path)))
-                    await message.channel.send(file=discord.File(random_image_path))
+                    if os.path.isdir(path) and os.listdir(path):
+                        random_image_path = os.path.join(path, random.choice(os.listdir(path)))
+                        await message.channel.send(file=discord.File(random_image_path))
         elif message.author.id == ANTOINE_ID and random.random() < 0.20:
             await message.channel.send(random.choice(MESSAGES_ANTOINE))
         elif any(trigger in message.content for trigger in TRIGGERS_BOT_NAME) or self.bot.user in message.mentions:
@@ -87,11 +100,20 @@ class LegumBot(commands.Bot):
 
     async def setup_hook(self):
         await self.add_cog(GeneralCommands(self))
+        await self.add_cog(
+            DealsCog(
+                self,
+                db_path=DEALS_DB_PATH,
+                dm_user_id=DEAL_DM_USER_ID,
+                channel_id=DEAL_CHANNEL_ID,
+            )
+        )
 
     async def on_ready(self):
         print(f"Bot connected as {self.user}")
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     legum_bot = LegumBot()
     legum_bot.run(PRIVATE_TOKEN)
