@@ -16,8 +16,19 @@ ALLOWED_USERS = getattr(TOKEN, "ALLOWED_USERS", [])
 ANTOINE_ID = getattr(TOKEN, "ANTOINE_ID", None)
 YOANN_ID = getattr(TOKEN, "YOANN_ID", None)
 DEALS_DB_PATH = getattr(TOKEN, "DEALS_DB_PATH", None)
-DEAL_DM_USER_ID = getattr(TOKEN, "DEAL_DM_USER_ID", None)
-DEAL_CHANNEL_ID = getattr(TOKEN, "DEAL_CHANNEL_ID", None)
+
+
+def _as_id_list(plural_name, singular_name):
+    """Accepte la liste (nouveau format) ou l'ID seul (ancien format)."""
+    ids = getattr(TOKEN, plural_name, None)
+    if ids is None:
+        single = getattr(TOKEN, singular_name, None)
+        ids = [single] if single else []
+    return [int(i) for i in ids]
+
+
+DEAL_DM_USER_IDS = _as_id_list("DEAL_DM_USER_IDS", "DEAL_DM_USER_ID")
+DEAL_CHANNEL_IDS = _as_id_list("DEAL_CHANNEL_IDS", "DEAL_CHANNEL_ID")
 
 
 class GeneralCommands(commands.Cog):
@@ -104,8 +115,8 @@ class LegumBot(commands.Bot):
             DealsCog(
                 self,
                 db_path=DEALS_DB_PATH,
-                dm_user_id=DEAL_DM_USER_ID,
-                channel_id=DEAL_CHANNEL_ID,
+                dm_user_ids=DEAL_DM_USER_IDS,
+                channel_ids=DEAL_CHANNEL_IDS,
             )
         )
 

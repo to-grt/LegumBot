@@ -21,17 +21,18 @@ CHECK_INTERVAL_SECONDS = 60
 
 
 class DealsCog(commands.Cog):
-    def __init__(self, bot, db_path, dm_user_id=None, channel_id=None):
+    def __init__(self, bot, db_path, dm_user_ids=(), channel_ids=()):
         self.bot = bot
         self.db_path = Path(db_path) if db_path else None
-        self.dm_user_id = dm_user_id
-        self.channel_id = channel_id
-        if self.db_path and (self.dm_user_id or self.channel_id):
+        self.dm_user_ids = list(dm_user_ids)
+        self.channel_ids = list(channel_ids)
+        if self.db_path and (self.dm_user_ids or self.channel_ids):
             self.check_deals.start()
         else:
             log.warning(
                 "Annonce des deals désactivée : DEALS_DB_PATH et au moins un "
-                "de DEAL_DM_USER_ID / DEAL_CHANNEL_ID doivent être renseignés"
+                "destinataire (DEAL_DM_USER_IDS / DEAL_CHANNEL_IDS) doivent "
+                "être renseignés"
             )
 
     def cog_unload(self):
@@ -95,25 +96,23 @@ class DealsCog(commands.Cog):
         """Envoie l'embed à toutes les cibles. Vrai si au moins une a reçu."""
         delivered = False
 
-        if self.dm_user_id:
+        for user_id in self.dm_user_ids:
             try:
-                user = self.bot.get_user(self.dm_user_id) or await self.bot.fetch_user(
-                    self.dm_user_id
-                )
+                user = self.bot.get_user(user_id) or await self.bot.fetch_user(user_id)
                 await user.send(embed=embed)
                 delivered = True
             except discord.DiscordException:
-                log.exception("Échec du MP à l'utilisateur %s", self.dm_user_id)
+                log.exception("Échec du MP à l'utilisateur %s", user_id)
 
-        if self.channel_id:
+        for channel_id in self.channel_ids:
             try:
                 channel = self.bot.get_channel(
-                    self.channel_id
-                ) or await self.bot.fetch_channel(self.channel_id)
+                    channel_id
+                ) or await self.bot.fetch_channel(channel_id)
                 await channel.send(embed=embed)
                 delivered = True
             except discord.DiscordException:
-                log.exception("Échec de l'envoi dans le salon %s", self.channel_id)
+                log.exception("Échec de l'envoi dans le salon %s", channel_id)
 
         return delivered
 
