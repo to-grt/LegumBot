@@ -21,7 +21,7 @@ DEALS_DB_PATH = getattr(TOKEN, "DEALS_DB_PATH", None)
 def _as_id_list(plural_name, singular_name):
     """Accepte la liste (nouveau format) ou l'ID seul (ancien format)."""
     ids = getattr(TOKEN, plural_name, None)
-    if ids is None:
+    if not ids:  # absente OU vide : repli sur l'ancien champ au singulier
         single = getattr(TOKEN, singular_name, None)
         ids = [single] if single else []
     return [int(i) for i in ids]
