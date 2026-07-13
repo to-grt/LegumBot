@@ -18,3 +18,7 @@ DEALS_DB_PATH = "/home/theo/pc-deals-bot/data/deals.db"
 DEAL_DM_USER_IDS = []  # ex: [123456789012345678, 987654321098765432]
 # IDs des salons texte où poster les deals. [] pour désactiver.
 DEAL_CHANNEL_IDS = []
+# Routage par recherche : {nom de watch (config.yaml de pc-deals-bot): [IDs
+# à prévenir en MP]}. Les recherches absentes de ce dict vont aux
+# destinataires par défaut ci-dessus.
+DEAL_ROUTES = {}  # ex: {"Casque gaming": [123456789012345678]}

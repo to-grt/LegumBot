@@ -29,6 +29,9 @@ def _as_id_list(plural_name, singular_name):
 
 DEAL_DM_USER_IDS = _as_id_list("DEAL_DM_USER_IDS", "DEAL_DM_USER_ID")
 DEAL_CHANNEL_IDS = _as_id_list("DEAL_CHANNEL_IDS", "DEAL_CHANNEL_ID")
+# Routage par recherche : {nom de watch pc-deals-bot: [IDs à prévenir en MP]}.
+# Les watches absentes suivent DEAL_DM_USER_IDS / DEAL_CHANNEL_IDS.
+DEAL_ROUTES = getattr(TOKEN, "DEAL_ROUTES", {})
 
 
 class GeneralCommands(commands.Cog):
@@ -117,6 +120,7 @@ class LegumBot(commands.Bot):
                 db_path=DEALS_DB_PATH,
                 dm_user_ids=DEAL_DM_USER_IDS,
                 channel_ids=DEAL_CHANNEL_IDS,
+                routes=DEAL_ROUTES,
             )
         )
 
