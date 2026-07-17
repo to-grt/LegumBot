@@ -13,6 +13,7 @@ routes suivent le comportement historique : MP à dm_user_ids et publication
 dans channel_ids.
 """
 
+import asyncio
 import logging
 import sqlite3
 from pathlib import Path
@@ -23,10 +24,22 @@ from discord.ext import commands, tasks
 log = logging.getLogger("legum_bot.deals")
 
 CHECK_INTERVAL_SECONDS = 60
+# Un passage manuel de pc-deals-bot ne doit pas bloquer le bot indéfiniment.
+SCAN_TIMEOUT_SECONDS = 180
 
 
 class DealsCog(commands.Cog):
-    def __init__(self, bot, db_path, dm_user_ids=(), channel_ids=(), routes=None):
+    def __init__(
+        self,
+        bot,
+        db_path,
+        dm_user_ids=(),
+        channel_ids=(),
+        routes=None,
+        allowed_user_ids=(),
+        scan_cmd=None,
+        scan_cwd=None,
+    ):
         self.bot = bot
         self.db_path = Path(db_path) if db_path else None
         self.dm_user_ids = list(dm_user_ids)
@@ -34,6 +47,11 @@ class DealsCog(commands.Cog):
         self.routes = {
             name: [int(i) for i in ids] for name, ids in (routes or {}).items()
         }
+        # !scan : qui peut déclencher une veille manuelle, et quoi lancer.
+        self.allowed_user_ids = [int(i) for i in allowed_user_ids]
+        self.scan_cmd = list(scan_cmd) if scan_cmd else []
+        self.scan_cwd = scan_cwd
+        self._scan_lock = asyncio.Lock()
         if self.db_path and (self.dm_user_ids or self.channel_ids or self.routes):
             self.check_deals.start()
         else:
@@ -136,24 +154,106 @@ class DealsCog(commands.Cog):
         delivered = await self._send_to_channels(self.channel_ids, embed) or delivered
         return delivered
 
-    @tasks.loop(seconds=CHECK_INTERVAL_SECONDS)
-    async def check_deals(self):
+    async def _announce_pending(self):
+        """Annonce les deals matchés pas encore envoyés. Renvoie le nb annoncé."""
         try:
             pending = self._fetch_pending()
         except sqlite3.Error:
             log.exception("Lecture de la base des deals impossible")
-            return
+            return 0
 
+        announced = 0
         for deal_id, title, url, price, temperature, watch_name in pending:
             embed = self._build_embed(title, url, price, temperature, watch_name)
             if await self._dispatch(embed, watch_name):
                 # marqué seulement si au moins une cible a reçu : sinon on
                 # retentera au prochain passage
                 self._mark_announced(deal_id)
+                announced += 1
 
-        if pending:
-            log.info("%d deal(s) annoncé(s) sur Discord", len(pending))
+        if announced:
+            log.info("%d deal(s) annoncé(s) sur Discord", announced)
+        return announced
+
+    @tasks.loop(seconds=CHECK_INTERVAL_SECONDS)
+    async def check_deals(self):
+        await self._announce_pending()
 
     @check_deals.before_loop
     async def before_check_deals(self):
         await self.bot.wait_until_ready()
+
+    # ------------------------------------------------------- Veille manuelle
+
+    async def _run_scan(self):
+        """Lance un passage immédiat de pc-deals-bot puis annonce.
+
+        Renvoie (ok: bool, announced: int, detail: str|None). detail décrit
+        l'erreur quand ok est faux.
+        """
+        if not self.scan_cmd:
+            return False, 0, "veille manuelle non configurée (DEALS_SCAN_CMD absent)"
+        if self._scan_lock.locked():
+            return False, 0, "un scan est déjà en cours"
+
+        async with self._scan_lock:
+            try:
+                proc = await asyncio.create_subprocess_exec(
+                    *self.scan_cmd,
+                    cwd=self.scan_cwd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.STDOUT,
+                )
+            except OSError as exc:
+                log.exception("Impossible de lancer le scan pc-deals-bot")
+                return False, 0, f"échec du lancement : {exc}"
+
+            try:
+                stdout, _ = await asyncio.wait_for(
+                    proc.communicate(), timeout=SCAN_TIMEOUT_SECONDS
+                )
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+                return False, 0, f"passage interrompu après {SCAN_TIMEOUT_SECONDS}s"
+
+            if proc.returncode != 0:
+                tail = (stdout or b"").decode("utf-8", "replace").strip()[-400:]
+                log.error(
+                    "Scan pc-deals-bot en échec (code %s) : %s",
+                    proc.returncode,
+                    tail,
+                )
+                return False, 0, f"pc-deals-bot a renvoyé le code {proc.returncode}"
+
+        announced = await self._announce_pending()
+        return True, announced, None
+
+    @commands.command(name="scan", aliases=["veille", "deals"])
+    @commands.cooldown(1, 30, commands.BucketType.guild)
+    async def scan(self, ctx):
+        """Lance immédiatement un passage de veille (au lieu d'attendre le cycle)."""
+        if self.allowed_user_ids and ctx.author.id not in self.allowed_user_ids:
+            await ctx.send("Seuls les patrons peuvent lancer une veille à la main :)")
+            return
+        if not self.scan_cmd:
+            await ctx.send("La veille manuelle n'est pas configurée (DEALS_SCAN_CMD).")
+            return
+
+        msg = await ctx.send("🔍 Passage de veille en cours…")
+        ok, announced, detail = await self._run_scan()
+        if not ok:
+            await msg.edit(content=f"⚠️ Veille non effectuée : {detail}")
+        elif announced:
+            await msg.edit(
+                content=f"✅ Veille terminée : {announced} nouveau(x) deal(s) annoncé(s)."
+            )
+        else:
+            await msg.edit(content="✅ Veille terminée : aucun nouveau deal.")
+
+    @scan.error
+    async def scan_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"⏳ Doucement ! Réessaie dans {error.retry_after:.0f}s.")
+        else:
+            raise error

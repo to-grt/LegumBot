@@ -22,3 +22,12 @@ DEAL_CHANNEL_IDS = []
 # à prévenir en MP]}. Les recherches absentes de ce dict vont aux
 # destinataires par défaut ci-dessus.
 DEAL_ROUTES = {}  # ex: {"Casque gaming": [123456789012345678]}
+
+# --- Commande !scan : veille manuelle immédiate (optionnel) ---
+# argv lancé en sous-processus pour un passage unique de pc-deals-bot (sans
+# --loop). Vide => la commande !scan est désactivée. Seuls les ALLOWED_USERS
+# peuvent la déclencher.
+DEALS_SCAN_CMD = []  # ex: ["/home/theo/pc-deals-bot/.venv/bin/python", "-m",
+#      "pc_deals_bot", "--config", "/home/theo/pc-deals-bot/config.yaml"]
+# Répertoire de travail du sous-processus (là où vit pc-deals-bot).
+DEALS_SCAN_CWD = None  # ex: "/home/theo/pc-deals-bot"

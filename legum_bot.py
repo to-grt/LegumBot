@@ -32,6 +32,10 @@ DEAL_CHANNEL_IDS = _as_id_list("DEAL_CHANNEL_IDS", "DEAL_CHANNEL_ID")
 # Routage par recherche : {nom de watch pc-deals-bot: [IDs à prévenir en MP]}.
 # Les watches absentes suivent DEAL_DM_USER_IDS / DEAL_CHANNEL_IDS.
 DEAL_ROUTES = getattr(TOKEN, "DEAL_ROUTES", {})
+# Commande !scan : argv à lancer pour un passage immédiat de pc-deals-bot
+# (liste), et répertoire de travail. Vide => commande !scan désactivée.
+DEALS_SCAN_CMD = getattr(TOKEN, "DEALS_SCAN_CMD", [])
+DEALS_SCAN_CWD = getattr(TOKEN, "DEALS_SCAN_CWD", None)
 
 
 class GeneralCommands(commands.Cog):
@@ -121,6 +125,9 @@ class LegumBot(commands.Bot):
                 dm_user_ids=DEAL_DM_USER_IDS,
                 channel_ids=DEAL_CHANNEL_IDS,
                 routes=DEAL_ROUTES,
+                allowed_user_ids=ALLOWED_USERS,
+                scan_cmd=DEALS_SCAN_CMD,
+                scan_cwd=DEALS_SCAN_CWD,
             )
         )
 
