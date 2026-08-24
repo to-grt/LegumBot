@@ -232,7 +232,7 @@ class DealsCog(commands.Cog):
     @commands.command(name="scan", aliases=["veille", "deals"])
     @commands.cooldown(1, 30, commands.BucketType.guild)
     async def scan(self, ctx):
-        """Lance immédiatement un passage de veille (au lieu d'attendre le cycle)."""
+        """[Admin] Lance immédiatement un passage de veille."""
         if self.allowed_user_ids and ctx.author.id not in self.allowed_user_ids:
             await ctx.send("Seuls les patrons peuvent lancer une veille à la main :)")
             return

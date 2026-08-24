@@ -3,3 +3,5 @@ TOKEN.py
 __pycache__/
 *.py[cod]
 .venv/
+*.avant-llm
+insultes.txt
