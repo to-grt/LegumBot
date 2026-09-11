@@ -40,7 +40,7 @@ DEALS_SCAN_CWD = None  # ex: "/home/theo/pc-deals-bot"
 LLM_ENABLED = True
 LLM_URL = "http://127.0.0.1:8080/v1/chat/completions"
 # Une réponse prend 7 à 12 s en pratique. 30 s laisse de la marge.
-LLM_TIMEOUT = 30
+LLM_TIMEOUT = 90
 # Seau à jetons : LLM_BUCKET_CAPACITY générations peuvent partir d'affilée
 # (pour absorber les vagues), puis le rythme se régule à LLM_REFILL_PER_HOUR.
 LLM_BUCKET_CAPACITY = 40
@@ -48,18 +48,17 @@ LLM_REFILL_PER_HOUR = 120
 # Le modèle a pour consigne de ne jamais citer de prénom (c'est le bot qui
 # appose la mention). S'il en produit un quand même, on replie sur
 # vocabulary.py. Mets ici les prénoms de la bande, en minuscules sans accent.
-LLM_KNOWN_NAMES = ["theo", "antoine", "yoann", "marie", "victor", "nicolas", "lucas"]
 
 # --- Probabilités de déclenchement ----------------------------------------
 # Ajustables à chaud sans toucher au code. Attention : à ces valeurs, une
 # soirée à 200 messages/heure produit 60 à 100 messages du bot. Baisse-les
 # si ça devient pénible.
-P_TYPING = 0.20    # quelqu'un est en train d'écrire
-P_MUTED = 0.20     # quelqu'un coupe son micro en vocal
-P_GOODBYE = 0.20   # quelqu'un quitte le vocal entre 0h et 8h
+P_TYPING = 0.10    # quelqu'un est en train d'écrire
+P_MUTED = 0.10     # quelqu'un coupe son micro en vocal
+P_GOODBYE = 0.10   # quelqu'un quitte le vocal entre 0h et 8h
 P_IMAGE = 0.20     # quelqu'un poste une pièce jointe
-P_ANTOINE = 0.50   # Antoine écrit un message
-P_MESSAGE = 0.20   # n'importe quel autre message
+P_ANTOINE = 0.30   # Antoine écrit un message
+P_MESSAGE = 0.10   # n'importe quel autre message
 
 # Salon où sont annoncés les événements vocaux (micro coupé, départ nocturne).
 # Si ce salon n'existe pas, le bot se replie sur le premier salon où il peut

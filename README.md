@@ -36,11 +36,11 @@ erreur rencontrée. C'est le premier réflexe quand le bot semble moins inspiré
 |---|---|---|
 | Quelqu'un cite le bot (`legum`, `bot`, `robot`…) | 100 % | `GREETINGS` |
 | Quelqu'un poste une pièce jointe | `P_IMAGE` (20 %) | `GREETINGS` |
-| Antoine écrit un message | `P_ANTOINE` (50 %) | `MESSAGES_ANTOINE` |
-| N'importe quel autre message | `P_MESSAGE` (20 %) | `MESSAGES_TYPING` |
-| Quelqu'un est en train d'écrire | `P_TYPING` (20 %) | `MESSAGES_TYPING` |
-| Quelqu'un coupe son micro en vocal | `P_MUTED` (20 %) | `MESSAGES_MUTED` |
-| Quelqu'un quitte le vocal entre 0h et 8h | `P_GOODBYE` (20 %) | `MESSAGES_GOODBYE` |
+| Antoine écrit un message | `P_ANTOINE` (30 %) | `MESSAGES_ANTOINE` |
+| N'importe quel autre message | `P_MESSAGE` (10 %) | `MESSAGES_TYPING` |
+| Quelqu'un est en train d'écrire | `P_TYPING` (10 %) | `MESSAGES_TYPING` |
+| Quelqu'un coupe son micro en vocal | `P_MUTED` (10 %) | `MESSAGES_MUTED` |
+| Quelqu'un quitte le vocal entre 0h et 8h | `P_GOODBYE` (10 %) | `MESSAGES_GOODBYE` |
 | Une commande après plus de 10 min d'absence | 100 % | `GREETINGS` |
 
 Les commandes (`!…`) ne déclenchent jamais de réponse générique en plus.

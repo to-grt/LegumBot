@@ -48,20 +48,14 @@ LLM_URL = getattr(TOKEN, "LLM_URL", "http://127.0.0.1:8080/v1/chat/completions")
 LLM_TIMEOUT = getattr(TOKEN, "LLM_TIMEOUT", 30)
 LLM_BUCKET_CAPACITY = getattr(TOKEN, "LLM_BUCKET_CAPACITY", 40)
 LLM_REFILL_PER_HOUR = getattr(TOKEN, "LLM_REFILL_PER_HOUR", 120)
-# Prénoms que le modèle ne doit jamais citer : s'il en produit un malgré la
-# consigne, on retombe sur vocabulary.py.
-LLM_KNOWN_NAMES = getattr(
-    TOKEN, "LLM_KNOWN_NAMES",
-    ["theo", "antoine", "yoann", "marie", "victor", "nicolas", "lucas"],
-)
 
 # --- Probabilités de déclenchement (ajustables sans toucher au code) ------
-P_TYPING = getattr(TOKEN, "P_TYPING", 0.20)
-P_MUTED = getattr(TOKEN, "P_MUTED", 0.20)
-P_GOODBYE = getattr(TOKEN, "P_GOODBYE", 0.20)
+P_TYPING = getattr(TOKEN, "P_TYPING", 0.10)
+P_MUTED = getattr(TOKEN, "P_MUTED", 0.10)
+P_GOODBYE = getattr(TOKEN, "P_GOODBYE", 0.10)
 P_IMAGE = getattr(TOKEN, "P_IMAGE", 0.20)
-P_ANTOINE = getattr(TOKEN, "P_ANTOINE", 0.50)
-P_MESSAGE = getattr(TOKEN, "P_MESSAGE", 0.20)
+P_ANTOINE = getattr(TOKEN, "P_ANTOINE", 0.30)
+P_MESSAGE = getattr(TOKEN, "P_MESSAGE", 0.10)
 
 # Salon où sont annoncés les événements vocaux. Repli sur le premier salon
 # écrivable si ce nom n'existe pas sur le serveur.
@@ -101,7 +95,6 @@ class GeneralCommands(commands.Cog):
             url=LLM_URL,
             enabled=LLM_ENABLED,
             timeout=LLM_TIMEOUT,
-            known_names=LLM_KNOWN_NAMES,
             bucket_capacity=LLM_BUCKET_CAPACITY,
             refill_per_hour=LLM_REFILL_PER_HOUR,
         )
