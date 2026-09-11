@@ -45,7 +45,7 @@ DEALS_SCAN_CWD = getattr(TOKEN, "DEALS_SCAN_CWD", None)
 # --- Génération locale des réponses (llm.py + llama-server) ---------------
 LLM_ENABLED = getattr(TOKEN, "LLM_ENABLED", True)
 LLM_URL = getattr(TOKEN, "LLM_URL", "http://127.0.0.1:8080/v1/chat/completions")
-LLM_TIMEOUT = getattr(TOKEN, "LLM_TIMEOUT", 30)
+LLM_TIMEOUT = getattr(TOKEN, "LLM_TIMEOUT", 90)
 LLM_BUCKET_CAPACITY = getattr(TOKEN, "LLM_BUCKET_CAPACITY", 40)
 LLM_REFILL_PER_HOUR = getattr(TOKEN, "LLM_REFILL_PER_HOUR", 120)
 

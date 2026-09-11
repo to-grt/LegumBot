@@ -109,7 +109,7 @@ class LlmClient:
         self,
         url="http://127.0.0.1:8080/v1/chat/completions",
         enabled=True,
-        timeout=30,
+        timeout=90,
         bucket_capacity=40,
         refill_per_hour=120,
     ):

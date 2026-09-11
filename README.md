@@ -54,9 +54,9 @@ Les commandes (`!…`) ne déclenchent jamais de réponse générique en plus.
 
 ```
 llama-server (systemd)          legum-bot (systemd)
-  Ministral-3-3B Q4_K_M   <--   llm.py  <--  legum_bot.py
+  Ministral-8B-2410       <--   llm.py  <--  legum_bot.py
   127.0.0.1:8080                             deals_cog.py
-  ~4,2 Go de RAM                             vocabulary.py (repli)
+                                             vocabulary.py (repli)
 ```
 
 `llm.py` interroge le serveur en HTTP local. **Tout échec — serveur absent,
@@ -64,22 +64,24 @@ délai dépassé, quota épuisé, sortie douteuse — retombe silencieusement su
 listes de `vocabulary.py`.** Le bot ne peut donc jamais devenir moins bavard
 qu'avant l'ajout du modèle.
 
-### Le modèle n'écrit jamais de prénom
-Ministral confondait les destinataires dans 3 cas sur 12. La consigne système
-lui interdit donc tout prénom : il produit une phrase anonyme, et le bot appose
-lui-même la mention Discord. Un filet de sécurité (`LLM_KNOWN_NAMES`) replie
-sur les listes figées si un prénom passe malgré tout.
+### Situations anonymes
+Le modèle ne sait pas à qui il parle : les situations qu'on lui envoie sont
+anonymes, et le bot appose lui-même la mention Discord. La consigne système lui
+demande de dire « tu » plutôt qu'un prénom, mais ce n'est plus imposé par le
+code (l'ancien filtre `LLM_KNOWN_NAMES` bloquait aussi les vannes ciblées).
+Historique : le 3B confondait les destinataires dans 3 cas sur 12, d'où ce choix.
 
 ### Garde-fous
 - Une génération à la fois, **jamais de file d'attente** — si occupé, repli
 - Seau à jetons : 40 d'affilée pour absorber les vagues, puis 120/heure
-- Timeout 30 s ; après 3 échecs consécutifs, pause de 5 min
-- Nettoyage : markdown retiré, guillemets encadrants retirés, 400 caractères max
+- Timeout 90 s (couvre le démarrage à froid du cache KV) ; après 3 échecs consécutifs, pause de 5 min
+- Nettoyage : markdown et guillemets retirés, adresse « LegumBot : » retirée, 400 caractères max
 - Insultes et propos blessants bloqués ; **grossièretés tolérées**
 - Les emoji sont conservés (choix assumé)
 
-Latence typique mesurée : **10 s** (6 à 15 s), masquée par l'indicateur
-« écrit… » de Discord.
+Latence mesurée sur le Pi avec le 8B : **9 s** en moyenne, jusqu'à 24 s quand
+le préfixe système n'est pas encore dans le cache KV. Elle est masquée par
+l'indicateur « écrit… » de Discord.
 
 ---
 
@@ -108,7 +110,7 @@ journalctl -u legum-bot -f           # journal en direct
 ```
 
 Le modèle vit dans `/home/theo/legum-llm/` (binaire `llama-server`, modèle
-GGUF, mesures de benchmark). Il n'est pas dans ce dépôt : 2 Go.
+GGUF, mesures de benchmark). Il n'est pas dans ce dépôt : trop lourd.
 
 ---
 
@@ -119,6 +121,6 @@ GGUF, mesures de benchmark). Il n'est pas dans ce dépôt : 2 Go.
 | Réponses répétitives, déjà vues | Le modèle ne répond plus → `!llm status`, puis `systemctl status llama-server` |
 | Bot muet | `journalctl -u legum-bot -n 50` |
 | Trop bavard | Baisser `P_*` dans `TOKEN.py`, redémarrer |
-| Réponses trop lentes | Normal (10 s). Sinon vérifier `vcgencmd get_throttled` |
+| Réponses trop lentes | Normal (9 s, 24 s à froid). Sinon vérifier `vcgencmd get_throttled` |
 | Annonces vocales absentes | Le bot journalise au démarrage quel salon il utilise |
 | Tout couper sans redémarrer | `!llm off` — retour immédiat aux phrases toutes faites |
